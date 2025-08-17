@@ -12,113 +12,97 @@ const ENTRIES = [
   { 
     kanji: "動物", 
     gloss: ["movimento", "coisa"], 
-    kunyomi: ["うご(く)", "もの"], 
-    onyomi: ["どう", "ぶつ"], 
+    onyomi: ["dou", "butsu"], 
     answer: "animal" 
   },
   { 
     kanji: "大学", 
     gloss: ["grande", "aprender"], 
-    kunyomi: ["おお(きい)", "まな(ぶ)"], 
-    onyomi: ["だい", "がく"], 
+    onyomi: ["dai", "gaku"], 
     answer: "universidade" 
   },
   { 
     kanji: "電車", 
     gloss: ["eletricidade", "veículo"], 
-    kunyomi: ["(つか)う", "くるま"], // 電 raramente usado em kunyomi
-    onyomi: ["でん", "しゃ"], 
+    onyomi: ["den", "sha"], 
     answer: "trem" 
   },
   { 
     kanji: "無理", 
     gloss: ["nenhum", "razão"], 
-    kunyomi: ["", ""],
-    onyomi: ["む", "り"], 
+    onyomi: ["mu", "ri"], 
     answer: "impossivel" 
   },
   { 
     kanji: "心配", 
     gloss: ["coração", "partilhar"], 
-    kunyomi: ["こころ", "くば(る)"], 
-    onyomi: ["しん", "ぱい"], 
+    onyomi: ["shin", "pai"], 
     answer: "preocupação" 
   },
   { 
     kanji: "天気", 
     gloss: ["céu", "espírito"], 
-    kunyomi: ["あま", "き"], 
-    onyomi: ["てん", "き"], 
+    onyomi: ["ten", "ki"], 
     answer: "clima" 
   },
   { 
     kanji: "火山", 
     gloss: ["fogo", "montanha"], 
-    kunyomi: ["ひ", "やま"], 
-    onyomi: ["か", "ざん"], 
+    onyomi: ["ka", "zan"], 
     answer: "vulcão" 
   },
   { 
     kanji: "手紙", 
     gloss: ["mão", "papel"], 
-    kunyomi: ["て", "かみ"], 
-    onyomi: ["て", "かみ"], 
+    onyomi: ["te", "gami"], 
     answer: "carta" 
   },
   { 
     kanji: "映画", 
     gloss: ["projetar", "quadro"], 
-    kunyomi: ["うつ(す)", "え"], 
-    onyomi: ["えい", "が"], 
+    onyomi: ["ei", "ga"], 
     answer: "filme" 
   },
   { 
     kanji: "自転車", 
     gloss: ["si mesmo", "girar", "veículo"], 
-    kunyomi: ["みずか(ら)", "ころ(がる)", "くるま"], 
-    onyomi: ["じ", "てん", "しゃ"], 
+    onyomi: ["ji", "ten", "sha"], 
     answer: "bicicleta" 
   },
   { 
     kanji: "図書館", 
     gloss: ["desenho", "livro", "prédio"], 
-    kunyomi: ["はか(る)", "しょ", "やかた"], 
-    onyomi: ["と", "しょ", "かん"], 
+    onyomi: ["to", "sho", "kan"], 
     answer: "biblioteca" 
   },
   { 
     kanji: "新聞", 
     gloss: ["novo", "escuta"], 
-    kunyomi: ["あたら(しい)", "き(く)"], 
-    onyomi: ["しん", "ぶん"], 
+    onyomi: ["shin", "bun"], 
     answer: "jornal" 
   },
   { 
     kanji: "医者", 
     gloss: ["medicina", "pessoa"], 
-    kunyomi: ["い(やす)", "もの"], 
-    onyomi: ["い", "しゃ"], 
+    onyomi: ["i", "sha"], 
     answer: "médico" 
   },
   { 
     kanji: "経済", 
     gloss: ["passar", "ajustar"], 
-    kunyomi: ["へ(る)", "す(む)"], 
-    onyomi: ["けい", "ざい"], 
+    onyomi: ["kei", "zai"], 
     answer: "economia" 
   },
   { 
     kanji: "文化", 
     gloss: ["escrita", "mudança"], 
-    kunyomi: ["ふみ", "ば(ける)"], 
-    onyomi: ["ぶん", "か"], 
+    onyomi: ["bun", "ka"], 
     answer: "cultura" 
   },
   { 
     kanji: "自然", 
     gloss: ["si mesmo", "assim"], 
-    kunyomi: ["みずか(ら)", "しか(し)"], 
-    onyomi: ["し", "ぜん"], 
+    onyomi: ["shi", "zen"], 
     answer: "natureza" 
   }
 ];
