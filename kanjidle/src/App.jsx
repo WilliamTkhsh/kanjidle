@@ -1,18 +1,19 @@
-import React, { useEffect, useState, useCallback, useMemo, useRef } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import Header from "./components/Header";
 import KanjiCard from "./components/KanjiCard";
 import GuessGrid from "./components/GuessGrid";
 import GuessInput from "./components/GuessInput";
+import Keyboard from "./components/Keyboard";
 import Toast from "./components/Toast";
 import GameOverModal from "./components/modals/GameOverModal";
 import InstructionsModal from "./components/modals/InstructionsModal";
 import SettingsModal from "./components/modals/SettingsModal";
 import { ThemeContext, getTheme } from "./theme";
 import { scoreGuess } from "./utils/scoreGuess";
-import { stripDiacritics, normalizeForDict } from "./utils/strings";
+import { stripDiacritics } from "./utils/strings";
+import { isValidWord, warmupSpell } from "./utils/spell.js";
 
 export default function App() {
-  // Estado do jogo
   const [entriesList, setEntriesList] = useState(null);
   const [entry, setEntry] = useState(null);
   const [answer, setAnswer] = useState("");
@@ -28,9 +29,6 @@ export default function App() {
   const [showInstructions, setShowInstructions] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
-
-  // Dicionário PT-BR (@andsfonseca/palavras-pt-br)
-  const dictRef = useRef(null);
 
   const attempts = 6;
 
@@ -52,15 +50,8 @@ export default function App() {
     const saved = localStorage.getItem("kanjidle-dark");
     if (saved === "1") setDarkMode(true);
 
-    // Pré-carrega o dicionário para validar palavras (carregamento preguiçoso)
-    import("@andsfonseca/palavras-pt-br").then((mod) => {
-      // Força a base PYTHONPROBR conforme solicitado
-      try { mod.Word.library = mod.PYTHONPROBR; } catch {}
-      dictRef.current = mod.Word;
-    }).catch(() => {
-      // se falhar, seguimos sem travar o jogo
-      dictRef.current = null;
-    });
+    // Pré-aquece a engine de dicionário (nspell + dictionary-pt)
+    warmupSpell().catch(() => {});
 
     const loadEntries = async () => {
       const module = await import("./entries.js");
@@ -98,39 +89,16 @@ export default function App() {
     const typed = current.trim();
     if (!typed) return;
 
-    // Verifica no dicionário se a palavra existe (tolerante a acentos e "ç")
     try {
-      let Word = dictRef.current;
-      if (!Word) {
-        const mod = await import("@andsfonseca/palavras-pt-br");
-        try { mod.Word.library = mod.PYTHONPROBR; } catch {}
-        Word = mod.Word;
-        dictRef.current = Word;
-      }
-
-      // 1) Tenta com a palavra digitada (a lib tem flag removeAccents)
-      let isValid = Word.checkValid(typed, 0, true, true, false, false);
-
-      // 2) Se falhar, tenta versão normalizada sem acento/cedilha
-      if (!isValid) {
-        const plain = normalizeForDict(typed);
-        isValid = Word.checkValid(plain, 0, true, true, false, false);
-      }
-
-      // 3) Último fallback: comparação estrita (sem remover acentos na lib),
-      //    pois algumas bases podem guardar a forma acentuada
-      if (!isValid) {
-        isValid = Word.checkValid(typed, 0, false, true, false, false);
-      }
-
-      if (!isValid) {
+      const ok = await isValidWord(typed);
+      if (!ok) {
         showToast("Palavra não existe no dicionário");
         return;
       }
     } catch (err) {
-      // Em caso de erro na importação/validação, não bloquear a jogada
       console.error("Falha ao validar no dicionário:", err);
     }
+
 
     const evalRow = scoreGuess(typed, answer);
     const newGuesses = [...guesses, typed];
@@ -138,6 +106,7 @@ export default function App() {
     setGuesses(newGuesses);
     setEvaluations(newEvals);
     setCurrent("");
+
 
     const won = stripDiacritics(typed) === stripDiacritics(answer);
     const finished = won || newGuesses.length >= attempts;
@@ -181,6 +150,19 @@ export default function App() {
           {!gameOver && (
             <GuessInput value={current} onChange={setCurrent} onEnter={onEnter} />
           )}
+
+
+        {/* Teclado virtual */}
+        <div className="mt-4 w-full max-w-lg">
+          <Keyboard
+            guesses={guesses}
+            evaluations={evaluations}
+            onChar={(ch) => setCurrent((prev) => (prev + ch))}
+            onEnter={onEnter}
+            onBackspace={() => setCurrent((prev) => prev.slice(0, -1))}
+            disabled={gameOver}
+          />
+        </div>
         </div>
 
         <Toast message={message} />
