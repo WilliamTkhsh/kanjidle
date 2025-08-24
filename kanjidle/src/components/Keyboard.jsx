@@ -3,8 +3,8 @@ import { useTheme, getTheme } from "../theme";
 import { stripDiacritics, MAX_INPUT_LEN } from "../utils/strings";
 
 const ROW1 = "QWERTYUIOP".split("");
-const ROW2_LETTERS = "ASDFGHJKL".split("");
-const ROW3_LETTERS = "ZXCVBNM".split("");
+const ROW2 = "ASDFGHJKL".split("");
+const ROW3 = "ZXCVBNM".split("");
 
 const STATE_PRIORITY = { absent: 0, present: 1, correct: 2 };
 
@@ -37,18 +37,23 @@ export default function Keyboard({
   const styles = getTheme(dark);
   const keyStates = useMemo(() => computeKeyStatuses(guesses, evaluations), [guesses, evaluations]);
 
-  const keyBase = "h-12 w-full rounded-xl font-bold text-sm sm:text-base flex items-center justify-center select-none";
+  // Estilo base + feedback (hover/active/focus)
+  const keyBase = "h-12 rounded-xl font-bold text-sm sm:text-base flex items-center justify-center select-none transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 disabled:opacity-60 disabled:cursor-not-allowed";
   const styleFor = (k) => {
     const st = keyStates[k];
     if (st === "correct") return "bg-green-500 text-white hover:bg-green-400 active:bg-green-300";
     if (st === "present") return "bg-yellow-500 text-white hover:bg-yellow-400 active:bg-yellow-300";
     if (st === "absent") return dark
-      ? "bg-slate-700 text-slate-300 hover:bg-slate-600 active:bg-slate-500"
+      ? "bg-slate-800 text-slate-300 hover:bg-slate-600 active:bg-slate-500"
       : "bg-slate-300 text-slate-800 hover:bg-slate-200 active:bg-slate-100";
+    // desconhecido (ENTER/⌫)
     return dark
       ? "bg-slate-600 text-slate-100 hover:bg-slate-500 active:bg-slate-400"
       : "bg-slate-200 text-slate-900 hover:bg-slate-100 active:bg-white";
   };
+
+  const SIZE_NORMAL = "w-10 sm:w-11 md:w-12"; // letras
+  const SIZE_WIDE = "w-24 sm:w-28 md:w-32";   // ENTER
 
   const tryAdd = (k) => {
     if (disabled) return;
@@ -56,49 +61,40 @@ export default function Keyboard({
     onChar?.(k);
   };
 
-  const Key = ({ label, onClick }) => (
-    <button disabled={disabled} onClick={onClick} className={`${keyBase} ${styleFor(label)}`}>
+  const Key = ({ label, onClick, wide = false, ariaLabel }) => (
+    <button
+      aria-label={ariaLabel || label}
+      disabled={disabled}
+      onClick={onClick}
+      className={`${keyBase} ${wide ? SIZE_WIDE : SIZE_NORMAL} ${styleFor(label)}`}
+    >
       {label}
     </button>
   );
 
-  const Spacer = () => <div className="h-12 w-full rounded-xl opacity-0 pointer-events-none" />;
-
-  const row1 = ROW1; // 10
-  const row2 = [...ROW2_LETTERS, "ENTER"]; // 9 + 1 = 10 (ENTER na linha 2)
-  const row3 = [...ROW3_LETTERS, "⌫"]; // 7 + 1 = 8 → +2 spacers para fechar 10
-
   return (
-    <div className="w-full max-w-lg mx-auto grid gap-2">
+    <div className="w-full max-w-lg mx-auto flex flex-col gap-2">
       {/* Linha 1 */}
-      <div className="grid grid-cols-10 gap-2">
-        {row1.map((k) => (
+      <div className="flex justify-center gap-2">
+        {ROW1.map((k) => (
           <Key key={k} label={k} onClick={() => tryAdd(k)} />
         ))}
       </div>
 
-      {/* Linha 2 (com ENTER) */}
-      <div className="grid grid-cols-10 gap-2">
-        {row2.map((k) =>
-          k === "ENTER" ? (
-            <Key key="ENTER" label="ENTER" onClick={() => onEnter?.()} />
-          ) : (
-            <Key key={k} label={k} onClick={() => tryAdd(k)} />
-          )
-        )}
+      {/* Linha 2 (deslocada e com BACKSPACE no fim) */}
+      <div className="flex justify-center gap-2 px-4">
+        {ROW2.map((k) => (
+          <Key key={k} label={k} onClick={() => tryAdd(k)} />
+        ))}
+        <Key label="⌫" ariaLabel="Apagar" onClick={() => onBackspace?.()} />
       </div>
 
-      {/* Linha 3 (com ⌫ + espaçadores para padronizar largura) */}
-      <div className="grid grid-cols-10 gap-2">
-        <Spacer />
-        {row3.map((k) =>
-          k === "⌫" ? (
-            <Key key="BACKSPACE" label="⌫" onClick={() => onBackspace?.()} />
-          ) : (
-            <Key key={k} label={k} onClick={() => tryAdd(k)} />
-          )
-        )}
-        <Spacer />
+      {/* Linha 3 (mais deslocada e com ENTER largo no fim) */}
+      <div className="flex justify-center gap-2 px-8">
+        {ROW3.map((k) => (
+          <Key key={k} label={k} onClick={() => tryAdd(k)} />
+        ))}
+        <Key label="ENTER" wide ariaLabel="Enviar" onClick={() => onEnter?.()} />
       </div>
     </div>
   );

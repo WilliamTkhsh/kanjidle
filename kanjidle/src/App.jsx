@@ -30,7 +30,7 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
 
-  const attempts = 6;
+  const attempts = 12;
 
   const pickRandom = useCallback(
     (excludeAnswer = null) => {
