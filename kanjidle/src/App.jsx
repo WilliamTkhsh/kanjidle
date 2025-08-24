@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import Header from "./components/Header";
 import KanjiCard from "./components/KanjiCard";
 import GuessGrid from "./components/GuessGrid";
-import GuessInput from "./components/GuessInput";
+import CurrentRow from "./components/CurrentRow";
 import Keyboard from "./components/Keyboard";
 import Toast from "./components/Toast";
 import GameOverModal from "./components/modals/GameOverModal";
@@ -10,7 +10,7 @@ import InstructionsModal from "./components/modals/InstructionsModal";
 import SettingsModal from "./components/modals/SettingsModal";
 import { ThemeContext, getTheme } from "./theme";
 import { scoreGuess } from "./utils/scoreGuess";
-import { stripDiacritics } from "./utils/strings";
+import { stripDiacritics, isPtLetter, MAX_INPUT_LEN } from "./utils/strings";
 import { isValidWord, warmupSpell } from "./utils/spell.js";
 
 export default function App() {
@@ -122,6 +122,29 @@ export default function App() {
     }
   };
 
+  
+    useEffect(() => {
+    const handleKey = (e) => {
+      if (showInstructions || showSettings || gameOver) return;
+
+      if (e.key === "Enter") {
+        e.preventDefault();
+        onEnter();
+        return;
+      }
+      if (e.key === "Backspace") {
+        e.preventDefault();
+        setCurrent((prev) => prev.slice(0, -1));
+        return;
+      }
+      if (e.key.length === 1 && isPtLetter(e.key)) {
+        setCurrent(prev => prev.length < MAX_INPUT_LEN ? prev + e.key : prev);
+      }
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [showInstructions, showSettings, gameOver, onEnter]);
+
   const styles = useMemo(() => getTheme(darkMode), [darkMode]);
 
   if (!entry) {
@@ -144,25 +167,20 @@ export default function App() {
 
         <KanjiCard entry={entry} />
 
-        {/* Grid de tentativas + input */}
         <div className="flex flex-col gap-2 mb-4 w-full max-w-lg">
           <GuessGrid guesses={guesses} evaluations={evaluations} />
-          {!gameOver && (
-            <GuessInput value={current} onChange={setCurrent} onEnter={onEnter} />
-          )}
+          {!gameOver && <CurrentRow current={current} />}
+        </div>
 
-
-        {/* Teclado virtual */}
         <div className="mt-4 w-full max-w-lg">
           <Keyboard
             guesses={guesses}
             evaluations={evaluations}
-            onChar={(ch) => setCurrent((prev) => (prev + ch))}
+            onChar={(ch) => setCurrent((prev) => prev + ch)}
             onEnter={onEnter}
             onBackspace={() => setCurrent((prev) => prev.slice(0, -1))}
             disabled={gameOver}
           />
-        </div>
         </div>
 
         <Toast message={message} />
