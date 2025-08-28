@@ -2,13 +2,6 @@ import React from "react";
 import Modal from "../ui/Modal";
 import { Button } from "../ui/Button";
 import { useTheme, getTheme } from "../../theme";
-import { MAX_INPUT_LEN } from "../../utils/strings";
-
-const Badge = ({ children, className = "" }) => (
-  <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ${className}`}>
-    {children}
-  </span>
-);
 
 const Tile = ({ ch, state = "absent", marker = "none" }) => {
   const color =
@@ -31,115 +24,85 @@ const Tile = ({ ch, state = "absent", marker = "none" }) => {
 };
 
 const ExampleRow = ({ letters, states = [], marker = "none" }) => (
-  <div className="flex gap-1 items-center">
+  <div className="flex gap-2 items-center justify-center">
     {letters.map((c, i) => (
       <Tile key={i} ch={c} state={states[i] || "absent"} marker={marker} />
     ))}
   </div>
 );
 
-const KeyChip = ({ label, className = "" }) => (
-  <kbd className={`px-2 py-1 rounded-md bg-slate-200 text-slate-800 text-xs font-semibold ${className}`}>{label}</kbd>
-);
-
 const LegendItem = ({ colorClass, text }) => (
-  <div className="flex items-center gap-2">
+  <div className="flex items-center justify-center gap-2">
     <span className={`inline-block w-3 h-3 rounded ${colorClass}`} />
     <span className="text-sm">{text}</span>
   </div>
 );
 
 const SectionTitle = ({ children }) => (
-  <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">{children}</h3>
+  <h3 className="text-base md:text-lg font-semibold uppercase tracking-wide text-slate-500 text-center">{children}</h3>
 );
 
-const InstructionsModal = ({ open, attempts, maxLen = MAX_INPUT_LEN, onClose }) => {
+const InstructionsModal = ({ open, onClose }) => {
   const { dark } = useTheme();
   const styles = getTheme(dark);
 
   return (
-    <Modal open={open} onClose={onClose} className={`${styles.modalBg} rounded-2xl p-6 shadow max-w-xl w-full`}>
-      <h2 className="text-xl font-bold mb-3">Como jogar</h2>
+    <Modal open={open} onClose={onClose} className={`${styles.modalBg} rounded-2xl p-8 shadow max-w-lg w-full text-center`}>
+      <h1 className="text-2xl md:text-3xl font-extrabold mb-4">Regras do jogo</h1>
 
-      {/* OBJETIVO */}
-      <div className="space-y-1 mb-4">
-        <SectionTitle>Objetivo</SectionTitle>
-        <p className={`${styles.subText} text-sm`}>
-          Adivinhe a <strong>palavra em português</strong> formada pelos <strong>significados dos kanjis</strong> exibidos.
-        </p>
-      </div>
-
-      {/* COMO JOGAR */}
       <div className="space-y-2 mb-4">
-        <SectionTitle>Como jogar</SectionTitle>
-        <ol className={`list-decimal pl-5 space-y-2 ${styles.subText} text-sm`}>
-          <li>Use o <strong>teclado na tela</strong> ou o <strong>teclado físico</strong> para digitar (máx. {maxLen} letras).</li>
-          <li>Pressione <KeyChip label="Enter" /> para enviar a tentativa ou <KeyChip label="⌫" /> para apagar a última letra.</li>
-          <li>A palavra precisa existir no <strong>dicionário de PT-BR</strong>. Se não existir, você verá um aviso.</li>
-          <li>Você tem <strong>{attempts}</strong> tentativas por rodada.</li>
-          <li>Acentos são <strong>opcionais</strong> (ex.: "cafe" = "café").</li>
-        </ol>
+        <SectionTitle>Exemplo</SectionTitle>
+        <span className="text-4xl font-bold">電車</span>
+        <div className="mt-4 grid grid-cols-2 gap-2 text-center">
+          <div className={`rounded-xl px-3 py-2 text-sm font-medium ${styles.pillBg}`}>
+            電 = eletricidade
+          </div>
+          <div className={`rounded-xl px-3 py-2 text-sm font-medium ${styles.pillBg}`}>
+            車 = veículo
+          </div>            
+        </div>        
       </div>
 
-      {/* CORES / FEEDBACK */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <div className="space-y-2">
-          <SectionTitle>Cores das letras (tamanho igual)</SectionTitle>
-          <div className="flex flex-col gap-2">
-            <ExampleRow letters={["c","a","s","a"]} states={["correct","present","absent","absent"]} />
-            <div className="grid grid-cols-1 gap-1">
-              <LegendItem colorClass="bg-green-500" text={<> <strong>Verde (correto)</strong>: letra certa no lugar certo.</>} />
-              <LegendItem colorClass="bg-yellow-500" text={<> <strong>Amarelo (presente)</strong>: letra existe, mas em outro lugar.</>} />
-              <LegendItem colorClass="bg-slate-400" text={<> <strong>Cinza (ausente)</strong>: letra não aparece na palavra.</>} />
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <SectionTitle>Comprimento da palavra</SectionTitle>
-          <div className="flex flex-col gap-3">
-            <div>
-              <p className="text-xs mb-1">Tentativa <strong>maior</strong> que a resposta</p>
-              <ExampleRow letters={["f","l","o","r","e","s"]} states={["present","absent","present","absent","absent","absent"]} marker="longer" />
-              <p className={`${styles.subText} text-xs mt-1`}>Barra <span className="border-t-4 border-red-500 pt-0.5 inline-block align-middle" style={{width:16}} /> vermelha no topo. Sem verdes; apenas amarelo/cinza.</p>
-            </div>
-            <div>
-              <p className="text-xs mb-1">Tentativa <strong>menor</strong> que a resposta</p>
-              <ExampleRow letters={["s","o","l"]} states={["present","absent","absent"]} marker="shorter" />
-              <p className={`${styles.subText} text-xs mt-1`}>Barra <span className="border-b-4 border-sky-300 pb-0.5 inline-block align-middle" style={{width:16}} /> azul clara embaixo. Sem verdes; apenas amarelo/cinza.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* TECLADO */}
+      {/* Tamanho diferente → NUNCA tem verde */}
       <div className="space-y-2 mb-4">
-        <SectionTitle>Teclado</SectionTitle>
-        <p className={`${styles.subText} text-sm`}>
-          As teclas mudam de cor conforme o seu progresso. O estado mais forte prevalece (ex.: se ficar verde, não volta a amarelo/cinza).
-        </p>
-        <div className="flex flex-wrap gap-3 text-sm">
-          <Badge className="bg-green-500 text-white">tecla verde = letra correta</Badge>
-          <Badge className="bg-yellow-500 text-white">tecla amarela = letra presente</Badge>
-          <Badge className="bg-slate-400 text-white">tecla cinza = ausente</Badge>
+        <SectionTitle>Tamanho diferente da resposta</SectionTitle>
+        <div className="flex flex-col gap-3 items-center">
+          <div>
+            <p className="text-sm md:text-base mb-1 text-center">Tentativa <strong>maior</strong> que a resposta. Barra <span className="border-t-4 border-red-500 pt-0.5 inline-block align-middle" style={{width:16}} /> vermelha no topo.</p>
+            <ExampleRow letters={["f","l","o","r","e","s"]} states={["absent","absent","absent","present","present","absent"]} marker="longer" />
+          </div>
+          <div>
+            <p className="text-sm md:text-base mb-1 text-center">Tentativa <strong>menor</strong> que a resposta. Barra <span className="border-b-4 border-sky-300 pb-0.5 inline-block align-middle" style={{width:16}} /> azul clara embaixo.</p>
+            <ExampleRow letters={["m","a","r"]} states={["present","absent","present"]} marker="shorter" />
+          </div>
+          <p className="text-sm md:text-base mb-1 text-center"><strong>Respostas com tamanho diferente NÃO TERÃO CORES VERDES</strong></p>
         </div>
       </div>
 
-      {/* DICAS RÁPIDAS */}
-      <div className="space-y-2 mb-6">
-        <SectionTitle>Dicas rápidas</SectionTitle>
-        <ul className={`list-disc pl-5 space-y-1 ${styles.subText} text-sm`}>
-          <li>Comece com palavras comuns e observe as <strong>glossas</strong> de cada kanji.</li>
-          <li>Use <em>Enter</em> para testar ideias. Ajuste conforme as cores.</li>
-          <li>Lembre-se: o <strong>tamanho</strong> precisa coincidir para habilitar o verde.</li>
-        </ul>
+      {/* Tamanho igual → permite verde */}
+      <div className="space-y-2 mb-4">
+        <SectionTitle>Tamanho igual da resposta</SectionTitle>
+        <ExampleRow letters={["t","e","m","a"]} states={["correct","present","present","absent"]} />
+        <div className="grid grid-cols-1 gap-2 place-items-center">
+          <LegendItem colorClass="bg-green-500" text={<><strong>Verde</strong>: letra certa no lugar certo.</>} />
+          <LegendItem colorClass="bg-yellow-500" text={<><strong>Amarelo</strong>: letra existe na palavra, mas em outra posição.</>} />
+          <LegendItem colorClass="bg-slate-400" text={<><strong>Cinza</strong>: a letra não aparece na palavra.</>} />
+        </div>
       </div>
 
-      <div className="flex justify-end gap-2">
-        <Button onClick={onClose}>Jogar agora</Button>
+      {/* Tamanho igual → permite verde */}
+      <div className="space-y-2 mb-4">
+        <SectionTitle>Resposta Correta</SectionTitle>
+        <ExampleRow letters={["t","r","e","m"]} states={["correct","correct","correct","correct"]} />
+        <p className="text-sm md:text-base mb-1 text-center">Pois combinando <strong>eletricidade</strong> e <strong>veículo</strong> forma a palavra <strong>TREM</strong> no japonês.</p>
+      </div>      
+
+      <div className="flex justify-center mt-6">
+        <Button onClick={onClose}>Jogar Agora</Button>
       </div>
     </Modal>
   );
 };
 
 export default InstructionsModal;
+

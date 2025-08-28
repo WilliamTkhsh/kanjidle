@@ -12,6 +12,8 @@ import { ThemeContext, getTheme } from "./theme";
 import { scoreGuess } from "./utils/scoreGuess";
 import { stripDiacritics, isPtLetter, MAX_INPUT_LEN } from "./utils/strings";
 import { isValidWord, warmupSpell } from "./utils/spell.js";
+import { pickDailyIndex, todayYMD } from "./utils/daily";
+import { loadAttempts, saveAttempts } from "./utils/dayStorage";
 
 export default function App() {
   const [entriesList, setEntriesList] = useState(null);
@@ -26,10 +28,17 @@ export default function App() {
   const [message, setMessage] = useState("");
 
   // UI
-  const [showInstructions, setShowInstructions] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(() => {
+    try {
+      return !localStorage.getItem("kanjidle_seen_instructions");
+    } catch {
+      return true; // fallback: considera iniciante
+    }
+  });
   const [showSettings, setShowSettings] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
-
+  const [today, setToday] = useState(() => todayYMD("America/Sao_Paulo"));
+  const GAME_EPOCH = "2025-01-01";
   const attempts = 12;
 
   const pickRandom = useCallback(
@@ -57,24 +66,65 @@ export default function App() {
       const module = await import("./entries.js");
       const loadedEntries = module.default;
       setEntriesList(loadedEntries);
-      const initialEntry = loadedEntries[Math.floor(Math.random() * loadedEntries.length)];
-      setEntry(initialEntry);
+
+      // Índice determinístico do dia (estilo Wordle/Termo)
+      const idx = pickDailyIndex(loadedEntries.length, {
+        epochYMD: GAME_EPOCH,
+        tz: "America/Sao_Paulo",
+        offset: 0, // se quiser "pular" dias manualmente
+      });
+      const chosen = loadedEntries[idx];
+      setEntry(chosen);
+      setToday(todayYMD("America/Sao_Paulo"));
+
+      // Restaura tentativas do dia (se houver) e reavalia
+      try {
+        const prev = loadAttempts(todayYMD("America/Sao_Paulo"));
+        if (prev.length > 0) {
+          setGuesses(prev);
+          setAnswer(chosen.answer);
+          const evals = prev.map(g => scoreGuess(g, chosen.answer));
+          setEvaluations(evals);
+          const won = prev.some(g => stripDiacritics(g) === stripDiacritics(chosen.answer));
+          const finished = won || prev.length >= attempts;
+          if (finished) {
+            setWin(won);
+            setGameOver(true);
+            setGameOverModal(true);
+          }
+        } else {
+          // zerar estado se não há nada salvo
+          setAnswer(chosen.answer);
+          setGuesses([]);
+          setEvaluations([]);
+          setCurrent("");
+          setGameOver(false);
+          setGameOverModal(false);
+          setWin(false);
+          setMessage("");
+        }
+      } catch {
+        // fallback em caso de erro de localStorage
+      }
     };
+
     loadEntries();
   }, []);
 
-  useEffect(() => {
-    if (entry) {
-      setAnswer(entry.answer);
-      setGuesses([]);
-      setEvaluations([]);
-      setCurrent("");
-      setGameOver(false);
-      setGameOverModal(false);
-      setWin(false);
-      setMessage("");
-    }
-  }, [entry]);
+/*
+useEffect(() => {
+  if (entry) {
+    setAnswer(entry.answer);
+    setGuesses([]);
+    setEvaluations([]);
+    setCurrent("");
+    setGameOver(false);
+    setGameOverModal(false);
+    setWin(false);
+    setMessage("");
+  }
+}, [entry]);
+*/
 
   useEffect(() => {
     localStorage.setItem("kanjidle-dark", darkMode ? "1" : "0");
@@ -99,7 +149,6 @@ export default function App() {
       console.error("Falha ao validar no dicionário:", err);
     }
 
-
     const evalRow = scoreGuess(typed, answer);
     const newGuesses = [...guesses, typed];
     const newEvals = [...evaluations, evalRow];
@@ -107,6 +156,8 @@ export default function App() {
     setEvaluations(newEvals);
     setCurrent("");
 
+    // >>> NOVO: persiste tentativas do dia
+    try { saveAttempts(today, newGuesses); } catch {}
 
     const won = stripDiacritics(typed) === stripDiacritics(answer);
     const finished = won || newGuesses.length >= attempts;
@@ -180,6 +231,9 @@ export default function App() {
             onEnter={onEnter}
             onBackspace={() => setCurrent((prev) => prev.slice(0, -1))}
             disabled={gameOver}
+            currentLen={current.length}
+            maxLen={MAX_INPUT_LEN}
+            totalAttempts={attempts}            
           />
         </div>
 
@@ -189,14 +243,16 @@ export default function App() {
           open={gameOver && gameOverModal}
           win={win}
           answer={answer}
-          onPlayAgain={() => setEntry(pickRandom(entry.answer))}
+          onPlayAgain={() => setGameOverModal(false)}
           onClose={() => setGameOverModal(false)}
         />
 
         <InstructionsModal
           open={showInstructions}
-          attempts={attempts}
-          onClose={() => setShowInstructions(false)}
+          onClose={() => {
+            try { localStorage.setItem("kanjidle_seen_instructions", "1"); } catch {}
+            setShowInstructions(false);
+          }}
         />
 
         <SettingsModal

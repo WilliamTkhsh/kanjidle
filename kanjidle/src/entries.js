@@ -12,12 +12,6 @@ const ENTRIES = [
     answer: "universidade" 
   },
   { 
-    kanji: "電車", 
-    gloss: ["eletricidade", "veículo"], 
-    onyomi: ["den", "sha"], 
-    answer: "trem" 
-  },
-  { 
     kanji: "無理", 
     gloss: ["nenhum", "razão"], 
     onyomi: ["mu", "ri"], 
@@ -132,12 +126,6 @@ const ENTRIES = [
     answer: "verdura"
   },
   { 
-    kanji: "地震", 
-    gloss: ["terra", "tremer"], 
-    onyomi: ["ji", "shin"], 
-    answer: "terremoto" 
-  },
-  { 
     kanji: "言葉", 
     gloss: ["dizer", "folha"], 
     onyomi: ["koto", "ba"], 
@@ -178,13 +166,7 @@ const ENTRIES = [
     gloss: ["céus", "espaço"], 
     onyomi: ["u", "chuu"], 
     answer: "universo" 
-  },
-  { 
-    kanji: "義務", 
-    gloss: ["justiça", "tarefa"], 
-    onyomi: ["gi", "mu"], 
-    answer: "dever" 
-  },    
+  }, 
   { 
     kanji: "性格", 
     gloss: ["natureza", "status"], 

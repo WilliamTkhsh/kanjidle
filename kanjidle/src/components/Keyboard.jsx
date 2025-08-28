@@ -20,7 +20,7 @@ function computeKeyStatuses(guesses, evaluations) {
       if (!curr || STATE_PRIORITY[st] > STATE_PRIORITY[curr]) map[key] = st;
     }
   }
-  return map; // ex.: { A: 'present', V: 'correct', R: 'absent' }
+  return map;
 }
 
 export default function Keyboard({
@@ -32,10 +32,22 @@ export default function Keyboard({
   disabled,
   currentLen = 0,
   maxLen = MAX_INPUT_LEN,
+  totalAttempts
 }) {
   const { dark } = useTheme();
   const styles = getTheme(dark);
   const keyStates = useMemo(() => computeKeyStatuses(guesses, evaluations), [guesses, evaluations]);
+
+  const used = (guesses?.length) || 0;
+  const total = totalAttempts || 0;
+  const ratio = total ? used / total : 0;
+  const attemptsColor = ratio >= 0.9
+    ? "text-red-500"
+    : ratio >= 0.75
+    ? "text-orange-500"
+    : ratio >= 0.5
+    ? "text-yellow-500"
+    : (dark ? "text-slate-100" : "text-slate-800");  
 
   // Estilo base + feedback (hover/active/focus)
   const keyBase = "h-12 rounded-xl font-bold text-sm sm:text-base flex items-center justify-center select-none transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 disabled:opacity-60 disabled:cursor-not-allowed";
@@ -74,6 +86,9 @@ export default function Keyboard({
 
   return (
     <div className="w-full max-w-lg mx-auto flex flex-col gap-2">
+      <div className="text-center -mb-1">
+        <span className={`text-lg font-extrabold tracking-wide ${attemptsColor}`}>{used}/{totalAttempts}</span>
+      </div>      
       {/* Linha 1 */}
       <div className="flex justify-center gap-2">
         {ROW1.map((k) => (

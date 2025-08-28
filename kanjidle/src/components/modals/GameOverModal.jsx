@@ -13,7 +13,6 @@ export default function GameOverModal({ open, win, answer, onPlayAgain, onClose 
         Resposta: <span className="font-semibold text-inherit">{answer.toUpperCase()}</span>
       </div>
       <div className="flex gap-2 justify-center">
-        <Button variant="primary" onClick={onPlayAgain}>Jogar outra</Button>
         <Button variant="secondary" onClick={onClose}>Fechar</Button>
       </div>
     </Modal>
