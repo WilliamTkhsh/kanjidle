@@ -4,21 +4,22 @@ export const ThemeContext = createContext({ dark: false, setDark: () => {} });
 export const useTheme = () => useContext(ThemeContext);
 
 export const getTheme = (dark) => ({
+  // Fundos inspirados em papel washi/sakura no claro e sumi/indigo no escuro
   pageBg: dark
-    ? "bg-gradient-to-br from-slate-900 to-slate-800"
-    : "bg-gradient-to-br from-purple-50 to-indigo-100",
-  cardBg: dark ? "bg-slate-900/70 backdrop-blur text-slate-100" : "bg-white",
-  subText: dark ? "text-slate-300" : "text-slate-600",
-  titleText: dark ? "text-indigo-200" : "text-indigo-700",
-  pillBg: dark ? "bg-slate-700 text-slate-100" : "bg-purple-100 text-purple-800",
+    ? "bg-gradient-to-br from-zinc-950 via-zinc-900 to-slate-900"
+    : "bg-gradient-to-br from-rose-50 via-amber-50 to-stone-100",
+  cardBg: dark ? "bg-zinc-900/70 backdrop-blur text-zinc-100" : "bg-white/90 text-stone-900",
+  subText: dark ? "text-zinc-300" : "text-stone-600",
+  titleText: dark ? "text-rose-300" : "text-rose-700",
+  pillBg: dark ? "bg-zinc-700 text-zinc-100" : "bg-rose-100 text-rose-800",
   inputStyle: dark
-    ? "border-slate-600 bg-slate-800 text-slate-100 focus:ring-indigo-400"
-    : "border-indigo-300 bg-white text-slate-900 focus:ring-indigo-500",
-  modalBg: dark ? "bg-slate-800 text-slate-100" : "bg-white text-slate-900",
+    ? "border-zinc-700 bg-zinc-800 text-zinc-100 focus:ring-rose-400"
+    : "border-rose-200 bg-white text-stone-900 focus:ring-rose-500",
+  modalBg: dark ? "bg-zinc-900 text-zinc-100" : "bg-white text-stone-900",
   btnPrimary: dark
-    ? "bg-indigo-600 hover:bg-indigo-500 text-white"
-    : "bg-indigo-600 hover:bg-indigo-700 text-white",
+    ? "bg-rose-500 hover:bg-rose-400 text-white"
+    : "bg-rose-600 hover:bg-rose-700 text-white",
   btnSecondary: dark
-    ? "bg-slate-600 hover:bg-slate-500 text-white"
-    : "bg-slate-200 hover:bg-slate-300 text-slate-800",
+    ? "bg-zinc-700 hover:bg-zinc-600 text-white"
+    : "bg-stone-200 hover:bg-stone-300 text-stone-800",
 });

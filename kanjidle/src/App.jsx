@@ -6,6 +6,7 @@ import CurrentRow from "./components/CurrentRow";
 import Keyboard from "./components/Keyboard";
 import Toast from "./components/Toast";
 import GameOverModal from "./components/modals/GameOverModal";
+import WinShareModal from "./components/modals/WinShareModal";
 import InstructionsModal from "./components/modals/InstructionsModal";
 import SettingsModal from "./components/modals/SettingsModal";
 import { ThemeContext, getTheme } from "./theme";
@@ -13,7 +14,7 @@ import { scoreGuess } from "./utils/scoreGuess";
 import { stripDiacritics, isPtLetter, MAX_INPUT_LEN } from "./utils/strings";
 import { isValidWord, warmupSpell } from "./utils/spell.js";
 import { pickDailyIndex, todayYMD } from "./utils/daily";
-import { loadAttempts, saveAttempts } from "./utils/dayStorage";
+import { loadAttempts, saveAttempts, loadState, saveState } from "./utils/dayStorage";
 
 export default function App() {
   const [entriesList, setEntriesList] = useState(null);
@@ -26,6 +27,10 @@ export default function App() {
   const [gameOverModal, setGameOverModal] = useState(false);
   const [win, setWin] = useState(false);
   const [message, setMessage] = useState("");
+  const [lastInputType, setLastInputType] = useState(null); // 'char' | 'backspace' | 'enter'
+  const [winShareOpen, setWinShareOpen] = useState(false);
+  const [shareText, setShareText] = useState("");
+  const [shareAttempts, setShareAttempts] = useState(0);
 
   // UI
   const [showInstructions, setShowInstructions] = useState(() => {
@@ -79,7 +84,9 @@ export default function App() {
 
       // Restaura tentativas do dia (se houver) e reavalia
       try {
-        const prev = loadAttempts(todayYMD("America/Sao_Paulo"));
+        const day = todayYMD("America/Sao_Paulo");
+        const prev = loadAttempts(day);
+        const persisted = loadState(day);
         if (prev.length > 0) {
           setGuesses(prev);
           setAnswer(chosen.answer);
@@ -90,7 +97,20 @@ export default function App() {
           if (finished) {
             setWin(won);
             setGameOver(true);
-            setGameOverModal(true);
+            setGameOverModal(!won);
+            if (won || persisted.win) {
+              try {
+                const [y, m, d] = day.split("-");
+                const dateBR = `${d}/${m}/${y}`;
+                const used = prev.length;
+                const mapCell = (st) => st === 'correct' ? '🟩' : (st === 'present' ? '🟨' : '⬛');
+                const grid = evals.map((row) => row.map(mapCell).join("")).join("\n");
+                const text = `Joguei Kanjidle em ${dateBR} e consegui em ${used} tentativa${used === 1 ? '' : 's'}.\n\n${grid}\n✅`;
+                setShareText(text);
+                setShareAttempts(used);
+              } catch {}
+              setWinShareOpen(true);
+            }
           }
         } else {
           // zerar estado se não há nada salvo
@@ -155,6 +175,7 @@ useEffect(() => {
     setGuesses(newGuesses);
     setEvaluations(newEvals);
     setCurrent("");
+    setLastInputType('enter');
 
     // >>> NOVO: persiste tentativas do dia
     try { saveAttempts(today, newGuesses); } catch {}
@@ -164,11 +185,23 @@ useEffect(() => {
     if (won) {
       setWin(true);
       setGameOver(true);
-      setGameOverModal(true);
+      setGameOverModal(false);
       showToast("Acertou!");
+      try { saveState(today, { win: true }); } catch {}
+      try {
+        const dateYMD = todayYMD("America/Sao_Paulo");
+        const [y, m, d] = dateYMD.split("-");
+        const dateBR = `${d}/${m}/${y}`;
+        const used = newGuesses.length;
+        const mapCell = (st) => st === 'correct' ? '🟩' : (st === 'present' ? '🟨' : '⬛');
+        const grid = newEvals.map((row) => row.map(mapCell).join("")).join("\n");
+        const text = `Joguei Kanjidle em ${dateBR} e consegui em ${used} tentativa${used === 1 ? '' : 's'}.\n\n${grid}\n✅`;
+        setShareText(text);
+      } catch {}
+      setTimeout(() => setWinShareOpen(true), 1000);
     } else if (finished) {
       setGameOver(true);
-      setGameOverModal(true);
+      setGameOverModal(true); 
       showToast(`Fim. Resposta: ${answer.toUpperCase()}`);
     }
   };
@@ -180,15 +213,18 @@ useEffect(() => {
 
       if (e.key === "Enter") {
         e.preventDefault();
+        setLastInputType('enter');
         onEnter();
         return;
       }
       if (e.key === "Backspace") {
         e.preventDefault();
+        setLastInputType('backspace');
         setCurrent((prev) => prev.slice(0, -1));
         return;
       }
       if (e.key.length === 1 && isPtLetter(e.key)) {
+        setLastInputType('char');
         setCurrent(prev => prev.length < MAX_INPUT_LEN ? prev + e.key : prev);
       }
     };
@@ -220,16 +256,16 @@ useEffect(() => {
 
         <div className="flex flex-col gap-2 mb-4 w-full max-w-lg">
           <GuessGrid guesses={guesses} evaluations={evaluations} />
-          {!gameOver && <CurrentRow current={current} />}
+          {!gameOver && <CurrentRow current={current} lastInputType={lastInputType} />}
         </div>
 
         <div className="mt-4 w-full max-w-lg">
           <Keyboard
             guesses={guesses}
             evaluations={evaluations}
-            onChar={(ch) => setCurrent((prev) => prev + ch)}
-            onEnter={onEnter}
-            onBackspace={() => setCurrent((prev) => prev.slice(0, -1))}
+            onChar={(ch) => { setLastInputType('char'); setCurrent((prev) => prev + ch); }}
+            onEnter={() => { setLastInputType('enter'); onEnter(); }}
+            onBackspace={() => { setLastInputType('backspace'); setCurrent((prev) => prev.slice(0, -1)); }}
             disabled={gameOver}
             currentLen={current.length}
             maxLen={MAX_INPUT_LEN}
@@ -245,6 +281,14 @@ useEffect(() => {
           answer={answer}
           onPlayAgain={() => setGameOverModal(false)}
           onClose={() => setGameOverModal(false)}
+        />
+
+        <WinShareModal
+          open={winShareOpen}
+          attempts={shareAttempts}
+          date={today}
+          gridText={shareText}
+          onClose={() => setWinShareOpen(false)}
         />
 
         <InstructionsModal

@@ -50,22 +50,22 @@ export default function Keyboard({
     : (dark ? "text-slate-100" : "text-slate-800");  
 
   // Estilo base + feedback (hover/active/focus)
-  const keyBase = "h-12 rounded-xl font-bold text-sm sm:text-base flex items-center justify-center select-none transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 disabled:opacity-60 disabled:cursor-not-allowed";
+  const keyBase = "h-14 sm:h-16 rounded-md font-bold text-base sm:text-lg md:text-xl flex items-center justify-center select-none transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 disabled:opacity-60 disabled:cursor-not-allowed";
   const styleFor = (k) => {
     const st = keyStates[k];
-    if (st === "correct") return "bg-green-500 text-white hover:bg-green-400 active:bg-green-300";
-    if (st === "present") return "bg-yellow-500 text-white hover:bg-yellow-400 active:bg-yellow-300";
+    if (st === "correct") return "bg-emerald-600 text-white hover:bg-emerald-500 active:bg-emerald-400";
+    if (st === "present") return "bg-amber-600 text-white hover:bg-amber-500 active:bg-amber-400";
     if (st === "absent") return dark
-      ? "bg-slate-800 text-slate-300 hover:bg-slate-600 active:bg-slate-500"
-      : "bg-slate-300 text-slate-800 hover:bg-slate-200 active:bg-slate-100";
+      ? "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 active:bg-zinc-600"
+      : "bg-stone-300 text-stone-800 hover:bg-stone-200 active:bg-stone-100";
     // desconhecido (ENTER/⌫)
     return dark
-      ? "bg-slate-600 text-slate-100 hover:bg-slate-500 active:bg-slate-400"
-      : "bg-slate-200 text-slate-900 hover:bg-slate-100 active:bg-white";
+      ? "bg-zinc-600 text-zinc-100 hover:bg-zinc-500 active:bg-zinc-400"
+      : "bg-stone-200 text-stone-900 hover:bg-stone-100 active:bg-white";
   };
 
-  const SIZE_NORMAL = "w-10 sm:w-11 md:w-12"; // letras
-  const SIZE_WIDE = "w-24 sm:w-28 md:w-32";   // ENTER
+  const SIZE_NORMAL = "w-12 sm:w-14 md:w-16"; // letras
+  const SIZE_WIDE = "w-28 sm:w-32 md:w-36";   // ENTER
 
   const tryAdd = (k) => {
     if (disabled) return;

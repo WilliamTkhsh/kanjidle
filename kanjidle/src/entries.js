@@ -359,6 +359,66 @@ const ENTRIES = [
     onyomi: ["geki", "jou"], 
     answer: "teatro" 
   },  
+  { 
+    kanji: "爆弾", 
+    gloss: ["explosão", "balas"], 
+    onyomi: ["baku", "dan"], 
+    answer: "bomba" 
+  },  
+  { 
+    kanji: "写真",
+    gloss: ["copiar", "verdade"],
+    onyomi: ["sha", "shin"],
+    answer: "foto" 
+  },
+  { 
+    kanji: "銀行", 
+    gloss: ["prata", "instituicao"], 
+    onyomi: ["gin", "kou"], 
+    answer: "banco"
+  },
+  { 
+    kanji: "空気", 
+    gloss: ["ceu", "espirito"], 
+    onyomi: ["kuu", "ki"], 
+    answer: "ar" 
+  },
+  { 
+    kanji: "料理", 
+    gloss: ["tratar", "razao"], 
+    onyomi: ["ryou", "ri"], 
+    answer: "culinaria" 
+  },
+  { 
+    kanji: "地図", 
+    gloss: ["terra", "desenho"], 
+    onyomi: ["chi", "zu"], 
+    answer: "mapa" 
+  },
+  { 
+    kanji: "花火", 
+    gloss: ["flor", "fogo"], 
+    onyomi: ["ka", "bi"], 
+    answer: "fogos" 
+  },
+  { 
+    kanji: "海外", 
+    gloss: ["mar", "fora"], 
+    onyomi: ["kai", "gai"], 
+    answer: "exterior" 
+  },
+  { 
+    kanji: "地下", 
+    gloss: ["terra", "abaixo"], 
+    onyomi: ["chi", "ka"], 
+    answer: "subsolo" 
+  },
+  { 
+    kanji: "日記", 
+    gloss: ["dia", "registro"], 
+    onyomi: ["nik", "ki"], 
+    answer: "diario" 
+  },
 ];
 
 export default ENTRIES;
