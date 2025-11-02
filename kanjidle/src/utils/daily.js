@@ -20,7 +20,7 @@ export function pickDailyIndex(entriesLen, {
   tz = "America/Sao_Paulo",
   offset = 0,
 } = {}) {
-  if (!Number.isInteger(entriesLen) || entriesLen <= 0) throw new Error("entriesLen inválido");
+  if (!Number.isInteger(entriesLen) || entriesLen <= 0) throw new Error("entriesLen inválido" + entriesLen);
   const n = daysSinceEpoch(epochYMD, tz) + offset;
   return ((n % entriesLen) + entriesLen) % entriesLen;
 }
