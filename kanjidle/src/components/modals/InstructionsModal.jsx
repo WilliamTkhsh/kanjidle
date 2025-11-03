@@ -47,7 +47,7 @@ const InstructionsModal = ({ open, onClose }) => {
   const styles = getTheme(dark);
 
   return (
-    <Modal open={open} onClose={onClose} className={`${styles.modalBg} rounded-2xl p-8 shadow max-w-lg w-full text-center`}>
+    <Modal open={open} onClose={onClose} className={`${styles.modalBg} rounded-2xl p-8 shadow max-w-lg w-full text-center max-h-[80vh] overflow-y-auto`}>
       <h1 className="text-2xl md:text-3xl font-extrabold mb-4">Regras do jogo</h1>
 
       <div className="space-y-2 mb-4">
